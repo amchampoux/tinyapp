@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/amchampoux/tinyapp/issues"
   },
-  "homepage": "https://github.com/amchampoux/tinyapp#readme"
+  "homepage": "https://github.com/amchampoux/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
