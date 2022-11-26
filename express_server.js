@@ -36,3 +36,14 @@ app.get("/urls/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+const generateRandomString = function() {
+  const allowedChars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let randomString = '';
+  for (let i = 6; i > 0; i --) {
+    randomString += allowedChars[Math.floor(Math.random() * allowedChars.length)];
+  }
+  return randomString;
+};
+
+// console.log(generateRandomString());
