@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
+const cookieParser = require('cookie-parser');
 
 // Middleware
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Database
 const urlDatabase = {
@@ -50,6 +52,12 @@ app.post("/urls/:id/update", (req, res) => {
 // Delete a current url from the database
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+// Set username cookie and redirect to index page
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username);
   res.redirect("/urls");
 });
 

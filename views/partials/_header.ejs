@@ -16,10 +16,16 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <form class="d-flex">
-          <div class="form-group mx-sm-3 mb-2">
-            <label for="InputUsername" class="sr-only">Username</label>
-            <input type="InputUsername" class="form-control me-2" id="InputUsername" placeholder="Username">
+      </div>
+      <div class="navbar-nav ml-auto">
+        <form class="d-flex" method="POST" action="/login">
+          <div class="form-group mx-sm-3 mb-2" >
+            <label for="username" class="sr-only">Username</label>
+            <input 
+              type="text" 
+              name="username"
+              class="form-control me-2 " 
+              placeholder="Username">
           </div>
           <button type="submit" class="btn btn-outline-dark mb-2">Login</button>
         </form>
