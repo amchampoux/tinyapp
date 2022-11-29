@@ -8,10 +8,24 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Database
+// URL Database
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+// Users Database
+const usersDatabase = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
 };
 
 // Routes
@@ -27,6 +41,18 @@ app.get("/register", (req, res) => {
     username: req.cookies["username"]
   };
   res.render("registration_form", templateVars);
+});
+// Add new user to database
+app.post("/register", (req, res) => {
+  const newUser = {
+    id: generateRandomString(),
+    email: req.body.email,
+    password: req.body.password
+  };
+  usersDatabase[newUser.id] = newUser;
+  res.cookie('id', newUser.id);
+  console.log(usersDatabase);
+  res.redirect("/urls");
 });
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
