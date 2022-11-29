@@ -19,6 +19,15 @@ const urlDatabase = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+// Opens register form
+app.get("/register", (req, res) => {
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
+  res.render("registration_form", templateVars);
+});
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
   const templateVars = {
@@ -64,7 +73,6 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
-
 // Set username cookie and redirect to index page
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
