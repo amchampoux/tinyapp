@@ -18,17 +18,26 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <div class="navbar-nav ml-auto">
-        <form class="d-flex" method="POST" action="/login">
-          <div class="form-group mx-sm-3 mb-2" >
-            <label for="username" class="sr-only">Username</label>
-            <input 
-              type="text" 
-              name="username"
-              class="form-control me-2 " 
-              placeholder="Username">
-          </div>
-          <button type="submit" class="btn btn-outline-dark mb-2">Login</button>
-        </form>
+        <% if(username){ %>
+          <form class="d-flex" method="POST" action="/logout">
+            <div class="form-group mx-sm-3 mb-2" >
+              <label class="my-2 mr-1">Log in as: <%= username %></label>
+            </div>
+            <button type="submit" class="btn btn-outline-dark mb-2">Logout</button>
+          </form>
+        <% } else { %>  
+          <form class="d-flex" method="POST" action="/login">
+            <div class="form-group mx-sm-3 mb-2" >
+              <label for="username" class="sr-only">Username</label>
+              <input 
+                type="text" 
+                name="username"
+                class="form-control me-2 " 
+                placeholder="Username">
+            </div>
+            <button type="submit" class="btn btn-outline-dark mb-2">Login</button>
+          </form>
+       <% } %>
       </div>
     </div>
   </nav>

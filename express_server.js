@@ -21,11 +21,17 @@ app.get("/", (req, res) => {
 });
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 // Access to urls index
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 // Add new URL to database and redirect to shortUrl info page
@@ -36,7 +42,11 @@ app.post("/urls", (req, res) => {
 });
 // Access to shortUrl info page
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies["username"]
+  };
   res.render("urls_show", templateVars);
 });
 // Redirect to longURL webpage
@@ -58,6 +68,12 @@ app.post("/urls/:id/delete", (req, res) => {
 // Set username cookie and redirect to index page
 app.post("/login", (req, res) => {
   res.cookie('username', req.body.username);
+  res.redirect("/urls");
+});
+
+// Clear cookie, logout user than redirect to index page
+app.post("/logout", (req, res) => {
+  res.clearCookie('username', req.body.username);
   res.redirect("/urls");
 });
 
