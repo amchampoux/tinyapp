@@ -105,15 +105,14 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
-// Set email cookie and redirect to index page
+// Set userId cookie and redirect to index page
 app.post("/login", (req, res) => {
-  res.cookie('email', req.body.email);
+  res.cookie('id', users.user.id);
   res.redirect("/urls");
 });
-
-// Clear cookie, logout user than redirect to index page
+// Clear userId cookie logout user than redirect to index page
 app.post("/logout", (req, res) => {
-  res.clearCookie('email', req.body.email);
+  res.clearCookie('id', users.user.id);
   res.redirect("/urls");
 });
 
