@@ -15,7 +15,7 @@ const urlDatabase = {
 };
 
 // Users Database
-const usersDatabase = {
+const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -35,37 +35,41 @@ app.get("/", (req, res) => {
 });
 // Opens register form
 app.get("/register", (req, res) => {
+  let userId = req.cookies["id"];
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    user: users[userId],
+
   };
+  console.log(users[req.body.id]);
   res.render("registration_form", templateVars);
 });
 // Add new user to database
 app.post("/register", (req, res) => {
-  const newUser = {
+  const user = {
     id: generateRandomString(),
     email: req.body.email,
     password: req.body.password
   };
-  usersDatabase[newUser.id] = newUser;
-  res.cookie('id', newUser.id);
-  console.log(usersDatabase);
+  users[user.id] = user;
+  res.cookie('id', user.id);
   res.redirect("/urls");
 });
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
+  let userId = req.cookies["id"];
   const templateVars = {
-    username: req.cookies["username"]
+    user: users[userId]
   };
   res.render("urls_new", templateVars);
 });
 // Access to urls index
 app.get("/urls", (req, res) => {
+  let userId = req.cookies["id"];
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[userId]
   };
   res.render("urls_index", templateVars);
 });
@@ -77,10 +81,12 @@ app.post("/urls", (req, res) => {
 });
 // Access to shortUrl info page
 app.get("/urls/:id", (req, res) => {
+  let userId = req.cookies["id"];
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    username: req.cookies["username"]
+    // username: req.cookies["username"],
+    user: users[userId]
   };
   res.render("urls_show", templateVars);
 });
@@ -99,15 +105,15 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
-// Set username cookie and redirect to index page
+// Set email cookie and redirect to index page
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('email', req.body.email);
   res.redirect("/urls");
 });
 
 // Clear cookie, logout user than redirect to index page
 app.post("/logout", (req, res) => {
-  res.clearCookie('username', req.body.username);
+  res.clearCookie('email', req.body.email);
   res.redirect("/urls");
 });
 
