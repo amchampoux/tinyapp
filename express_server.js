@@ -33,6 +33,18 @@ const users = {
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+// Opens login form
+app.get("/login", (req, res) => {
+  let userId = req.cookies["id"];
+  const templateVars = {
+    id: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    user: users[userId],
+  };
+  res.render("login_form", templateVars);
+});
+
+
 // Opens register form
 app.get("/register", (req, res) => {
   let userId = req.cookies["id"];
@@ -50,9 +62,6 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  // const email = req.body.email;
-  // const password = req.body.password;
-
   // check if email or password is undefined (the client didn't provide a value)
   if (!user.email || !user.password) {
     return res.status(400).send('Please provide an email and a password');
@@ -62,7 +71,7 @@ app.post("/register", (req, res) => {
   } else {
   // add user to database, create a cookie, then redirect to urls index
     users[user.id] = user;
-    res.cookie('id', user.id);
+    req.cookies('id', user.id);
     res.redirect("/urls");
   }
 
@@ -120,7 +129,7 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 // Set userId cookie and redirect to index page
 app.post("/login", (req, res) => {
-  res.cookie('id', users.user.id);
+  res.cookie('id', users.user.id); /////////////////// will need to update and remove "users"
   res.redirect("/urls");
 });
 // Clear userId cookie logout user than redirect to index page
