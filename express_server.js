@@ -40,9 +40,7 @@ app.get("/register", (req, res) => {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
     user: users[userId],
-
   };
-  console.log(users[req.body.id]);
   res.render("registration_form", templateVars);
 });
 // Add new user to database
@@ -52,10 +50,26 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  users[user.id] = user;
-  res.cookie('id', user.id);
-  res.redirect("/urls");
+  // const email = req.body.email;
+  // const password = req.body.password;
+
+  // check if email or password is undefined (the client didn't provide a value)
+  if (!user.email || !user.password) {
+    return res.status(400).send('Please provide an email and a password');
+  // check if user already in database
+  } else if (getUserByEmail(req.body.email) !== null) {
+    return res.status(400).send('You are already registered');
+  } else {
+  // add user to database, create a cookie, then redirect to urls index
+    users[user.id] = user;
+    res.cookie('id', user.id);
+    res.redirect("/urls");
+  }
+
+  console.log(users);
+
 });
+
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
   let userId = req.cookies["id"];
@@ -85,7 +99,6 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id],
-    // username: req.cookies["username"],
     user: users[userId]
   };
   res.render("urls_show", templateVars);
@@ -112,7 +125,7 @@ app.post("/login", (req, res) => {
 });
 // Clear userId cookie logout user than redirect to index page
 app.post("/logout", (req, res) => {
-  res.clearCookie('id', users.user.id);
+  res.clearCookie('id');
   res.redirect("/urls");
 });
 
@@ -131,3 +144,14 @@ const generateRandomString = function() {
   return randomString;
 };
 
+// Function to find a user in database
+const getUserByEmail = function(email) {
+  let user = null;
+  Object.entries(users).forEach(function(item) {
+    if (email === item[1].email) {
+      user = item[1];
+      return;
+    }
+  });
+  return user;
+};
