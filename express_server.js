@@ -41,7 +41,11 @@ app.get("/login", (req, res) => {
     longURL: urlDatabase[req.params.id],
     user: users[userId],
   };
-  res.render("login_form", templateVars);
+  if (userId) {
+    res.redirect("/urls");
+  } else {
+    res.render("login_form", templateVars);
+  }
 });
 
 // post login
@@ -65,7 +69,11 @@ app.get("/register", (req, res) => {
     longURL: urlDatabase[req.params.id],
     user: users[userId],
   };
-  res.render("registration_form", templateVars);
+  if (userId) {
+    res.redirect("/urls");
+  } else {
+    res.render("registration_form", templateVars);
+  }
 });
 
 // Add new user to database
@@ -93,7 +101,11 @@ app.get("/urls/new", (req, res) => {
   const templateVars = {
     user: users[userId]
   };
-  res.render("urls_new", templateVars);
+  if (userId) {
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect("/login");
+  }
 });
 // Access to urls index
 app.get("/urls", (req, res) => {
@@ -106,9 +118,15 @@ app.get("/urls", (req, res) => {
 });
 // Add new URL to database and redirect to shortUrl info page
 app.post("/urls", (req, res) => {
-  const shortId = generateRandomString();
-  urlDatabase[shortId] = req.body.longURL;
-  res.redirect(`/urls/${shortId}`);
+  let userId = req.cookies["id"];
+  if (userId) {
+    const shortId = generateRandomString();
+    urlDatabase[shortId] = req.body.longURL;
+    res.redirect(`/urls/${shortId}`);
+  } else {
+    res.send("You need to be logged in to create a tiny URL");
+  }
+
 });
 // Access to shortUrl info page
 app.get("/urls/:id", (req, res) => {
@@ -123,7 +141,12 @@ app.get("/urls/:id", (req, res) => {
 // Redirect to longURL webpage
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
-  res.redirect(longURL);
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.send("This shortId does not exist");
+  }
+  
 });
 // Update a current url from the database on the shortUrl info page then redirect to index
 app.post("/urls/:id/update", (req, res) => {
