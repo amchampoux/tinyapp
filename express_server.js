@@ -44,6 +44,27 @@ app.get("/login", (req, res) => {
   res.render("login_form", templateVars);
 });
 
+// post login
+app.post("/login", (req, res) => {
+  const user = {
+    id: generateRandomString(),
+    email: req.body.email,
+    password: req.body.password
+  };
+  // If a user with that e-mail cannot be found, return a response with a 403 status code.
+  if ((getUserByEmail(req.body.email) === null)) {
+    return res.status(403).send('This email does not exist, please register');
+    // If a user with that e-mail address is located, compare the password given in the form with the existing user's password.
+    // If it does not match, return a response with a 403 status code.
+  } else if ((getUserByEmail(req.body.email) !== null) && req.body.password !== getUserByEmail(req.body.email).password) {
+    return res.status(403).send('The information provided is not valid');
+  // If both checks pass, set the user_id cookie with the matching user's random ID, then redirect to /urls.
+  } else {
+    res.cookie('id', user.id);
+    res.redirect("/urls");
+  }
+ 
+});
 
 // Opens register form
 app.get("/register", (req, res) => {
@@ -55,6 +76,7 @@ app.get("/register", (req, res) => {
   };
   res.render("registration_form", templateVars);
 });
+
 // Add new user to database
 app.post("/register", (req, res) => {
   const user = {
@@ -62,21 +84,16 @@ app.post("/register", (req, res) => {
     email: req.body.email,
     password: req.body.password
   };
-  // check if email or password is undefined (the client didn't provide a value)
   if (!user.email || !user.password) {
     return res.status(400).send('Please provide an email and a password');
-  // check if user already in database
   } else if (getUserByEmail(req.body.email) !== null) {
     return res.status(400).send('You are already registered');
   } else {
-  // add user to database, create a cookie, then redirect to urls index
     users[user.id] = user;
-    req.cookies('id', user.id);
+    res.cookie('id', user.id);
     res.redirect("/urls");
+    console.log(users);
   }
-
-  console.log(users);
-
 });
 
 // Access to new shortURL form
@@ -129,19 +146,28 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 // Set userId cookie and redirect to index page
 app.post("/login", (req, res) => {
-  res.cookie('id', users.user.id); /////////////////// will need to update and remove "users"
+  const user = {
+    id: generateRandomString(),
+    email: req.body.email,
+    password: req.body.password
+  };
+  res.cookie('id', user.id); /////////////////// will need to update and remove "users"
   res.redirect("/urls");
 });
 // Clear userId cookie logout user than redirect to index page
 app.post("/logout", (req, res) => {
   res.clearCookie('id');
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 // Server listening
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+
+
+
 
 // Function to generate a random shortURL
 const generateRandomString = function() {
