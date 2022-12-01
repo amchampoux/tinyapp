@@ -26,13 +26,10 @@
             <button type="submit" class="btn btn-outline-dark mb-2">Logout</button>
           </form>
         <% } else { %>  
-          <form class="d-flex" method="GET" action="/register">
-            <button type="submit" class="btn btn-outline-dark mb-2 mr-3">Register</button>
-          </form>
-          <div></div>
-          <form class="d-flex" method="GET" action="/login">
-            <button type="submit" class="btn btn-outline-dark mb-2">Login</button>
-          </form>
+          <div class="navbar-nav">
+            <a class="nav-item nav-link" href="/register">Register</a>
+            <a class="nav-item nav-link" href="/login">Login</a>
+          </div>
        <% } %>
       </div>
     </div>
