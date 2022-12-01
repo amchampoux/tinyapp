@@ -10,8 +10,14 @@ app.use(cookieParser());
 
 // URL Database
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 // Users Database
@@ -29,16 +35,16 @@ const users = {
 };
 
 // Routes
+
 // Access to Homepage
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
 // Opens login form
 app.get("/login", (req, res) => {
   let userId = req.cookies["id"];
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
     user: users[userId],
   };
   if (userId) {
@@ -65,8 +71,6 @@ app.post("/login", (req, res) => {
 app.get("/register", (req, res) => {
   let userId = req.cookies["id"];
   const templateVars = {
-    id: req.params.id,
-    longURL: urlDatabase[req.params.id],
     user: users[userId],
   };
   if (userId) {
@@ -107,6 +111,7 @@ app.get("/urls/new", (req, res) => {
     res.redirect("/login");
   }
 });
+
 // Access to urls index
 app.get("/urls", (req, res) => {
   let userId = req.cookies["id"];
@@ -116,43 +121,47 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+
 // Add new URL to database and redirect to shortUrl info page
 app.post("/urls", (req, res) => {
   let userId = req.cookies["id"];
   if (userId) {
     const shortId = generateRandomString();
-    urlDatabase[shortId] = req.body.longURL;
+    urlDatabase[shortId].longURL = req.body.longURL;
     res.redirect(`/urls/${shortId}`);
   } else {
     res.send("You need to be logged in to create a tiny URL");
   }
 
 });
+
 // Access to shortUrl info page
 app.get("/urls/:id", (req, res) => {
   let userId = req.cookies["id"];
   const templateVars = {
     id: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
     user: users[userId]
   };
   res.render("urls_show", templateVars);
 });
+
 // Redirect to longURL webpage
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
+  const longURL = urlDatabase[req.params.id].longURL;
   if (longURL) {
     res.redirect(longURL);
   } else {
     res.send("This shortId does not exist");
   }
-  
 });
+
 // Update a current url from the database on the shortUrl info page then redirect to index
 app.post("/urls/:id/update", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id].longURL = req.body.longURL;
   res.redirect("/urls");
 });
+
 // Delete a current url from the database
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
