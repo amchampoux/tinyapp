@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
 
 //////////////////////////////////////////////////////////////
 // Middleware
@@ -108,9 +110,9 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Fields can\'t be empty');
   }
   const user = getUserByEmail(email);
-  if ((getUserByEmail(email) === null)) {
+  if (getUserByEmail(email) === null) {
     return res.status(403).send('This email does not exist, please register');
-  } else if ((getUserByEmail(email) !== null) && password !== getUserByEmail(email).password) {
+  } else if (getUserByEmail(email) !== null && !bcrypt.compareSync(password, users[user.id].hashedPassword)) {
     return res.status(403).send('The information provided is not valid');
   } else {
     res.cookie('id', user.id);
@@ -135,12 +137,13 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashedPassword = bcrypt.hashSync(password, salt);
   const user = {
     id: generateRandomString(),
     email,
-    password
+    hashedPassword
   };
-  if (!user.email || !user.password) {
+  if (!user.email || !user.hashedPassword) {
     return res.status(400).send('Please provide an email and a password');
   } else if (getUserByEmail(email) !== null) {
     return res.status(400).send('You are already registered');
@@ -148,6 +151,7 @@ app.post("/register", (req, res) => {
     users[user.id] = user;
     res.cookie('id', user.id);
     res.redirect("/urls");
+    console.log('Users database is: ', users);
   }
 });
 
