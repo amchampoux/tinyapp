@@ -1,9 +1,19 @@
 const express = require("express");
 const app = express();
 const PORT = 8080;
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
+
+//////////////////////////////////////////////////////////////
+// Config
+//////////////////////////////////////////////////////////////
+
+const sessionConfig = {
+  name: 'session_id',
+  keys: ['sample_session_key'],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+};
 
 //////////////////////////////////////////////////////////////
 // Middleware
@@ -11,7 +21,7 @@ const salt = bcrypt.genSaltSync(10);
 
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+app.use(cookieSession(sessionConfig));
 
 //////////////////////////////////////////////////////////////
 // Helper functions
@@ -91,7 +101,7 @@ app.get("/", (req, res) => {
 
 // Opens login form
 app.get("/login", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   const templateVars = {
     user: users[userID],
   };
@@ -115,14 +125,14 @@ app.post("/login", (req, res) => {
   } else if (getUserByEmail(email) !== null && !bcrypt.compareSync(password, users[user.id].hashedPassword)) {
     return res.status(403).send('The information provided is not valid');
   } else {
-    res.cookie('id', user.id);
+    req.session.user_id = user.id;
     res.redirect("/urls");
   }
 });
 
 // Opens register form
 app.get("/register", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   const templateVars = {
     user: users[userID],
   };
@@ -149,7 +159,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send('You are already registered');
   } else {
     users[user.id] = user;
-    res.cookie('id', user.id);
+    req.session.user_id = user.id;
     res.redirect("/urls");
     console.log('Users database is: ', users);
   }
@@ -157,7 +167,7 @@ app.post("/register", (req, res) => {
 
 // Access to new shortURL form
 app.get("/urls/new", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   const templateVars = {
     user: users[userID]
   };
@@ -170,7 +180,7 @@ app.get("/urls/new", (req, res) => {
 
 // Access to urls index
 app.get("/urls", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   if (userID) {
     const userUrls = urlsForUser(userID, urlDatabase);
     const templateVars = {
@@ -185,7 +195,7 @@ app.get("/urls", (req, res) => {
 
 // Add new URL to database and redirect to shortUrl info page
 app.post("/urls", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   if (userID) {
     const shortID = generateRandomString();
     const longURL = req.body.longURL;
@@ -201,7 +211,7 @@ app.post("/urls", (req, res) => {
 
 // Access to shortUrl info page
 app.get("/urls/:id", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   const templateVars = {
     id: req.params.id,
     longURL: urlDatabase[req.params.id].longURL,
@@ -229,7 +239,7 @@ app.get("/u/:id", (req, res) => {
 
 // Update a current url from the database on the shortUrl info page then redirect to index
 app.post("/urls/:id/update", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   if (!userID) {
     res.send("You need to be logged in to access your tiny URLs");
   } else if (!urlDatabase[req.params.id]) {
@@ -245,7 +255,7 @@ app.post("/urls/:id/update", (req, res) => {
 
 // Delete a current url from the database
 app.post("/urls/:id/delete", (req, res) => {
-  let userID = req.cookies["id"];
+  let userID = req.session.user_id;
   if (!userID) {
     res.send("You need to be logged in to access your tiny URLs");
   } else if (!urlDatabase[req.params.id]) {
@@ -261,7 +271,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Clear userId cookie logout user than redirect to index page
 app.post("/logout", (req, res) => {
-  res.clearCookie('id');
+  req.session = null;
   res.redirect("/login");
 });
 
