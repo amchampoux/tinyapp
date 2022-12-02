@@ -1,6 +1,7 @@
+const getUserByEmail = require('./helpers');
 const express = require("express");
 const app = express();
-const PORT = 8080;
+const PORT = 3000;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
@@ -35,18 +36,6 @@ const generateRandomString = function() {
     randomString += allowedChars[Math.floor(Math.random() * allowedChars.length)];
   }
   return randomString;
-};
-
-// Function to find a user in database
-const getUserByEmail = function(email) {
-  let user = null;
-  Object.entries(users).forEach(function(item) {
-    if (email === item[1].email) {
-      user = item[1];
-      return;
-    }
-  });
-  return user;
 };
 
 // Function to return a user URLs
@@ -119,10 +108,10 @@ app.post("/login", (req, res) => {
   if (!email || !password) {
     return res.status(403).send('Fields can\'t be empty');
   }
-  const user = getUserByEmail(email);
-  if (getUserByEmail(email) === null) {
+  const user = getUserByEmail(email, users);
+  if (!getUserByEmail(email, users)) {
     return res.status(403).send('This email does not exist, please register');
-  } else if (getUserByEmail(email) !== null && !bcrypt.compareSync(password, users[user.id].hashedPassword)) {
+  } else if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send('The information provided is not valid');
   } else {
     req.session.user_id = user.id;
@@ -151,11 +140,11 @@ app.post("/register", (req, res) => {
   const user = {
     id: generateRandomString(),
     email,
-    hashedPassword
+    password: hashedPassword
   };
-  if (!user.email || !user.hashedPassword) {
+  if (!user.email || !user.password) {
     return res.status(400).send('Please provide an email and a password');
-  } else if (getUserByEmail(email) !== null) {
+  } else if (getUserByEmail(email, users)) {
     return res.status(400).send('You are already registered');
   } else {
     users[user.id] = user;
