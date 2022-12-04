@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const getUserByEmail = require('./helpers');
 const express = require("express");
 const app = express();
